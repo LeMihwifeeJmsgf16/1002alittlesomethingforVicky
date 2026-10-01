@@ -152,8 +152,6 @@ html,body{height:100%;overflow:hidden;background:#bfe3f7;font-family:var(--px);c
 <div class="it b" id="mon" data-tip="開電腦"></div>
 <div class="it b" id="mirror" data-tip="快點按！"></div>
 <div class="it b" id="env" data-tip="羊吱葳給你的信"></div>
-<div class="it b" id="key" data-tip="可拖移"></div>
-<div class="it b" id="drawer" data-tip="未解鎖"><div id="hole"></div></div>
 <div class="it b" id="note" data-tip="！"></div>
 <div class="it b" id="cakeW" data-tip="抹茶蛋糕"><i></i></div>
 <div class="it b" id="pud" data-tip="什麼時候一起去日本吃爆抹茶"></div>
@@ -164,7 +162,6 @@ html,body{height:100%;overflow:hidden;background:#bfe3f7;font-family:var(--px);c
 <div class="it b" id="spk" data-tip="♪"></div>
 <div class="it b" id="bed" data-tip="什麼時候才要把裡面的塑膠袋拿掉？"></div>
 <div class="it b" id="shark" data-tip="Happy birthday!"></div>
-<div id="pop"><canvas id="popc" width="16" height="16"></canvas></div>
 <canvas id="fw"></canvas><div id="dim"></div><div id="glow"></div>
 </div></div>
 <div id="tip"></div>
@@ -248,14 +245,6 @@ $("#mon").onclick=()=>setTimeout(()=>{location.href=URL_RICK},150);
 /* ===== 蛋糕 ===== */
 let cakeStep=0;
 $("#cakeW").onclick=()=>{if(cakeStep==0){cakeStep=1;tip.textContent="請許願";tip.style.display="block";const b=$("#cakeW").getBoundingClientRect();tip.style.left=b.left+"px";tip.style.top=b.top-40+"px";setTimeout(()=>tip.style.display="none",1500)}else if(cakeStep==1){cakeStep=2;$("#cakeW").classList.add("off");sfx("blow")}};
-/* ===== 鑰匙 / 抽屜 ===== */
-let unlocked=false;const key=$("#key");let drag=null;
-key.addEventListener("pointerdown",e=>{if(unlocked)return;e.preventDefault();key.setPointerCapture(e.pointerId);const b=key.getBoundingClientRect();drag={dx:e.clientX-b.left,dy:e.clientY-b.top};key.style.cursor="grabbing"});
-key.addEventListener("pointermove",e=>{if(!drag)return;const r=room.getBoundingClientRect();key.style.left=(e.clientX-drag.dx-r.left)/r.width*100+"%";key.style.top=(e.clientY-drag.dy-r.top)/r.height*100+"%"});
-key.addEventListener("pointerup",e=>{if(!drag)return;drag=null;const k=key.getBoundingClientRect(),h=$("#hole").getBoundingClientRect();const cx=k.left+k.width/2,cy=k.top+k.height/2;if(cx>h.left-20&&cx<h.right+20&&cy>h.top-20&&cy<h.bottom+20){unlocked=true;const r=room.getBoundingClientRect();key.style.left=(h.left+h.width/2-k.width/2-r.left)/r.width*100+"%";key.style.top=(h.top+h.height/2-k.height/2-r.top)/r.height*100+"%";key.style.transition="transform .4s steps(4)";key.style.transform="rotate(90deg)";sfx("click","unlock")}});
-const popc=$("#popc");
-(()=>{const x=popc.getContext("2d");x.font="14px serif";x.textAlign="center";x.textBaseline="middle";x.fillText("🥳",8,9)})();
-$("#drawer").onclick=()=>{if(!unlocked)return;const p=$("#pop");p.classList.remove("go");void p.offsetWidth;p.classList.add("go");sfx("horn")};
 /* ===== 覆蓋層 ===== */
 function openOv(id,cb){const o=$(id);o.classList.remove("out");o.classList.add("on");cb&&cb()}
 function closeOv(o){o.classList.add("out");setTimeout(()=>{o.classList.remove("on","out");$$(".heart,.fdeco").forEach(h=>h.remove());if(o.id=="ovCam"){const v=o.querySelector("video");v.srcObject&&v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null}if(o.id=="ovMirror")resetMirror()},400)}
@@ -278,11 +267,10 @@ $("#note").onclick=()=>openOv("#ovNote");
 $("#cam").onclick=()=>openOv("#ovCam",()=>{navigator.mediaDevices&&navigator.mediaDevices.getUserMedia({video:true}).then(s=>{$("#camBox video").srcObject=s}).catch(()=>{})});
 /* ===== 換圖系統：把 PNG 放進 assets/ 資料夾，檔名對得上就會自動取代色塊 ===== */
 const IMG_DIR="assets/";
-const IMGS={lamp:"lamp",win:"window",photo:"photo",desk:"desk",chair:"chair",shelf:"shelf",cam:"camera",mon:"computer",mirror:"mirror",drawer:"drawer",cakeW:"cake",pud:"pudding",env:"envelope",key:"key",note:"note",trash:"trash",spk:"speaker",bed:"bed",shark:"shark"};
+const IMGS={lamp:"lamp",win:"window",photo:"photo",desk:"desk",chair:"chair",shelf:"shelf",cam:"camera",mon:"computer",mirror:"mirror",cakeW:"cake",pud:"pudding",env:"envelope",note:"note",trash:"trash",spk:"speaker",bed:"bed",shark:"shark"};
 function tryImg(url,ok){const i=new Image();i.onload=()=>ok(url);i.src=url}
 Object.entries(IMGS).forEach(([id,name])=>{tryImg(IMG_DIR+name+".png",u=>{const el=document.getElementById(id);el.classList.add("img");el.style.backgroundImage=`url(${u})`;if(id=="desk"){$("#deskf").style.display="none";$$(".leg").forEach(l=>l.style.display="none")}})});
 tryImg(IMG_DIR+"room.png",u=>{room.classList.add("roomimg");room.style.backgroundImage=`url(${u})`});
-tryImg(IMG_DIR+"party.png",u=>{$("#pop").innerHTML=`<img src="${u}" style="width:11cqw;height:auto">`});
 tryImg(IMG_DIR+"carrot.png",u=>{$$(".carrot").forEach(c=>c.innerHTML=`<img src="${u}" style="width:3cqw">`)});
 tryImg(IMG_DIR+"cake_off.png",u=>{$("#cakeW").addEventListener("click",()=>{if($("#cakeW").classList.contains("off"))$("#cakeW").style.backgroundImage=`url(${u})`})});
 tryImg(IMG_DIR+"trash_fall.png",u=>{$("#trash").addEventListener("click",()=>{$("#trash").style.transform="none";$("#trash").style.backgroundImage=`url(${u})`})});
